@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../app/generated/prisma"
 }
 
 datasource db {
@@ -78,10 +77,10 @@ enum PropertyType {
 }
 
 enum BHK {
-  One
-  Two
-  Three
-  Four
+ One    @map("1")
+  Two    @map("2")
+  Three  @map("3")
+  Four   @map("4")
   Studio
 }
 
@@ -94,7 +93,7 @@ enum Timeline {
   ZERO_TO_THREE_MONTHS @map("0-3m")
   THREE_TO_SIX_MONTHS  @map("3-6m")
   MORE_THAN_SIX_MONTHS @map(">6m")
-  EXPLORING
+  EXPLORING  @map("Exploring")
 }
 
 
