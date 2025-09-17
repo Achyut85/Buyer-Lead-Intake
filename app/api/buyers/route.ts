@@ -29,52 +29,76 @@ export async function POST(req: NextRequest) {
       Exploring: "EXPLORING",
     };
 
+    const SOURCE_MAP: Record<string, "Website" | "Referral" | "Walk_in" | "Call" | "Other"> = {
+      Website: "Website",
+      Referral: "Referral",
+      "Walk-in": "Walk_in", // matches Prisma enum
+      Call: "Call",
+      Other: "Other",
+    };
+
     const buyer = await prisma.buyer.create({
       data: {
-        ...validatedData,
-        ownerId,
+        fullName: validatedData.fullName,
+        email: validatedData.email ?? null,
+        phone: validatedData.phone,
+        city: validatedData.city,
+        propertyType: validatedData.propertyType,
         bhk: validatedData.bhk ? bhkMap[validatedData.bhk] : null,
-        timeline: TIMELINE_MAP[validatedData.timeline] || validatedData.timeline,
+        purpose: validatedData.purpose,
         budgetMin: validatedData.budgetMin ?? null,
         budgetMax: validatedData.budgetMax ?? null,
+        timeline: TIMELINE_MAP[validatedData.timeline] || validatedData.timeline,
+        source: SOURCE_MAP[validatedData.source], // ✅ FIX HERE
+        status: validatedData.status,
         notes: validatedData.notes ?? null,
         tags: validatedData.tags ?? [],
+        ownerId,
       },
     });
 
     return NextResponse.json({ success: true, buyer }, { status: 201 });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      return NextResponse.json({ success: false, errors: err.flatten() }, { status: 400 });
+      return NextResponse.json(
+        { success: false, errors: err.flatten() },
+        { status: 400 }
+      );
     }
     console.error(err);
-    return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
 
 
-// GET: Fetch buyers with pagination (concurrency safe)
+
+
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
 
-    // Pagination: page number and limit
-    const page = Math.min(Math.max(parseInt(searchParams.get("page") || "1"), 1), 20); // 1-20 pages max
-    const limit = 10; // rows per page
+    // page with safe default
+    const page = Math.max(parseInt(searchParams.get("page") || "1", 10), 1);
+
+    // get total rows
+    const total = await prisma.buyer.count();
+
+    // force 10 pages always → calculate limit dynamically
+    const totalPages = 10; 
+    const limit = Math.ceil(total / totalPages); 
     const skip = (page - 1) * limit;
 
-    // Concurrency control: use transaction for consistent count + fetch
-    const [total, buyers] = await prisma.$transaction([
-      prisma.buyer.count(),
-      prisma.buyer.findMany({
-        skip,
-        take: limit,
-        orderBy: { updatedAt: "desc" },
-      }),
-    ]);
-
-    const totalPages = Math.min(Math.ceil(total / limit), 20); // max 20 pages
+    // fetch rows
+    const buyers = await prisma.buyer.findMany({
+      skip,
+      take: limit,
+      orderBy: { updatedAt: "desc" },
+    });
 
     return NextResponse.json({
       success: true,
@@ -82,9 +106,13 @@ export async function GET(req: NextRequest) {
       total,
       totalPages,
       page,
+      limit,
     });
   } catch (err) {
-    console.error(err);
-    return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 });
+    console.error("GET /api/buyers error:", err);
+    return NextResponse.json(
+      { success: false, message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

@@ -1,62 +1,69 @@
-import { Button } from "@/app/components/ui/button";
-import { Input } from "@/app/components/ui/input";
-import { Plus, Upload, Download, SearchIcon, Filter } from "lucide-react";
-import LeadsTable from "./components/LeadsTable";
-import Link from "next/link";
+
+"use client";
+
+import LeadsTable, { Lead } from "./components/LeadsTable";
+import { useState, useEffect } from "react"
+import Header from "./components/Header";
+import SearchFilter from "./components/SearchFilter";
 
 
 export default function Home() {
+
+  const [buyers, setBuyers] = useState<Lead[]>([])
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  
+
+  useEffect(() => {
+  fetch(`/api/buyers?page=${page}`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (!data?.buyers || !Array.isArray(data.buyers)) {
+        setBuyers([]); // fallback empty list
+        setTotalPages(1); 
+        return;
+      }
+
+      const leads: Lead[] = data.buyers.map((b: any) => ({
+        id: b.id,
+        name: b.fullName,
+        phone: b.phone,
+        city: b.city,
+        propertyType: b.propertyType,
+        budget: b.budgetMin && b.budgetMax
+          ? `₹${b.budgetMin} – ₹${b.budgetMax}`
+          : b.budgetMin
+            ? `₹${b.budgetMin}`
+            : b.budgetMax
+              ? `₹${b.budgetMax}`
+              : "NA",
+        timeline: b.timeline,
+        status: b.status,
+        updatedAt: b.updatedAt
+          ? new Date(b.updatedAt).toLocaleDateString()
+          : "NA",
+      }));
+
+      setBuyers(leads);
+      console.log("buyers:", data.buyers);
+      setTotalPages(data.totalPages || 1);
+    })
+    .catch((err) => {
+      console.error("Error fetching buyers:", err);
+      setBuyers([]);
+    });
+}, [page]);
+
   return (
-    <div className=" lg:ml-12 border-l px-6 py-4 lg:h-screen border-slate-200 ">
+    <div className=" lg:ml-12 border-l px-6 py-4  border-slate-200 ">
       {/* <Navbar/> */}
-
-      {/* Header */}
-      <div className="border-b border-slate-200 pb-4">
-        <div className="flex flex-col gap-2 lg:flex-row lg:justify-between lg:items-center">
-          {/* Title */}
-          <div className="text-center lg:text-left mb-2 lg:mb-0">
-            <h1 className="text-3xl font-bold">Buyers</h1>
-            <p className="text-slate-600 text-sm">Know your buyers information.</p>
-          </div>
-          {/* Action buttons */}
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            <Button variant="outline" size="sm" className="w-full sm:w-auto">
-              <Upload /> Import
-            </Button>
-            <Button variant="outline" size="sm" className="w-full sm:w-auto">
-              <Download /> Export
-            </Button>
-            <Link href="/buyers/new">
-              <Button variant="blue" size="sm" className="w-full sm:w-auto">
-                <Plus /> Add New
-              </Button>
-            </Link>
-
-          </div>
-        </div>
-        {/* Tabs */}
-        <ul className="flex items-center gap-5 mt-5 text-sm">
-          <li className="cursor-pointer">All Buyers</li>
-          <li className="cursor-pointer text-slate-400">Your Leads</li>
-        </ul>
-      </div>
-
-      {/* Search + Filters */}
-      <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex w-full sm:max-w-sm items-center gap-2">
-          <Input type="email" placeholder="Search by email" />
-          <Button type="submit" variant="outline">
-            <SearchIcon />
-          </Button>
-        </div>
-        <Button type="button" variant="outline" className="w-full sm:w-auto">
-          <Filter /> Filters
-        </Button>
-      </div>
-
-      {/* Table */}
-      <LeadsTable />
-
+      <Header />
+      <SearchFilter />
+      <LeadsTable
+        leads={buyers}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage} />
     </div>
   );
 }

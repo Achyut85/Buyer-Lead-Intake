@@ -154,24 +154,24 @@ export const csvBuyerSchema = z.object({
 });
 
 // Query parameters schema for filtering
-export const buyerQuerySchema = z.object({
-  page: z.string().transform(Number).pipe(z.number().int().min(1)).default('1'),
-  limit: z.string().transform(Number).pipe(z.number().int().min(1).max(100)).default('10'),
-  search: z.string().optional(),
-  city: citySchema.optional(),
-  propertyType: propertyTypeSchema.optional(),
-  status: statusSchema.optional(),
-  timeline: timelineSchema.optional(),
-  sortBy: z.enum(['fullName', 'updatedAt', 'createdAt', 'city', 'status']).default('updatedAt'),
-  sortOrder: z.enum(['asc', 'desc']).default('desc'),
-});
+// export const buyerQuerySchema = z.object({
+//   page: z.string().transform(Number).pipe(z.number().int().min(1)).default('1'),
+//   limit: z.string().transform(Number).pipe(z.number().int().min(1).max(100)).default('10'),
+//   search: z.string().optional(),
+//   city: citySchema.optional(),
+//   propertyType: propertyTypeSchema.optional(),
+//   status: statusSchema.optional(),
+//   timeline: timelineSchema.optional(),
+//   sortBy: z.enum(['fullName', 'updatedAt', 'createdAt', 'city', 'status']).default('updatedAt'),
+//   sortOrder: z.enum(['asc', 'desc']).default('desc'),
+// });
 
 // Export types
 export type BuyerInput = z.infer<typeof buyerSchema>;
 export type CreateBuyerInput = z.infer<typeof createBuyerSchema>;
 export type UpdateBuyerInput = z.infer<typeof updateBuyerSchema>;
 export type CsvBuyerInput = z.infer<typeof csvBuyerSchema>;
-export type BuyerQuery = z.infer<typeof buyerQuerySchema>;
+// export type BuyerQuery = z.infer<typeof buyerQuerySchema>;
 
 // Validation helper functions
 export function validateBuyer(data: unknown) {
@@ -190,6 +190,6 @@ export function validateCsvBuyer(data: unknown) {
   return csvBuyerSchema.safeParse(data);
 }
 
-export function validateBuyerQuery(data: unknown) {
-  return buyerQuerySchema.safeParse(data);
-}
+// export function validateBuyerQuery(data: unknown) {
+//   return buyerQuerySchema.safeParse(data);
+// }
