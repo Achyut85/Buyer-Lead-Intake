@@ -1,10 +1,10 @@
 import LeadForm from "@/app/components/LeadForm"
-import Header from "@/app/components/Header"
-
+import Navbar from "@/app/components/Navbar"
 export default function LeadFormField() {
     return (
-        <div>
-            <LeadForm />
+        <div className="w-full max-w-7xl ">
+            <Navbar/>
+            <LeadForm /> 
         </div>
     )
 }

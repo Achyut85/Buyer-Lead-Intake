@@ -93,9 +93,9 @@ export function ImportModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="flex items-center gap-2">
+        <Button variant="outline" size="sm"  className="w-full sm:w-auto h-11 px-6 rounded-2xl border-2 border-gray-200/80 hover:border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm">
           <Upload className="h-4 w-4" />
-          Import
+          Import Data
         </Button>
       </DialogTrigger>
 

@@ -119,3 +119,11 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+body {
+  display: flex;
+  flex-direction: column;
+  justify-items: center;
+  align-items: center;
+}

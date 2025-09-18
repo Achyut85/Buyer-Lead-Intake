@@ -1,10 +1,12 @@
 import Header from "../components/Header"
-import SearchFilter from "../components/SearchFilter"
+import BuyerFilters from "../components/BuyerFilters"
+import Navbar from "../components/Navbar"
 export default function Buyers(){
     return (
-        <div className=" lg:ml-12 border-l px-6 py-4  border-slate-200 ">
+        <div className=" g:border-x px-6 py-4 border-gray-300 max-w-7xl w-full">
+            <Navbar/>
             <Header />
-            <SearchFilter /> 
+            <BuyerFilters/>
         </div>
     )
 }

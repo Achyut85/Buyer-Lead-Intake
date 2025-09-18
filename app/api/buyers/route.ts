@@ -77,7 +77,6 @@ export async function POST(req: NextRequest) {
 
 
 
-
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -85,16 +84,35 @@ export async function GET(req: NextRequest) {
     // page with safe default
     const page = Math.max(parseInt(searchParams.get("page") || "1", 10), 1);
 
-    // get total rows
-    const total = await prisma.buyer.count();
+    // filters
+    const city = searchParams.get("city");
+    const propertyType = searchParams.get("propertyType");
+    const status = searchParams.get("status");
+    const timeline = searchParams.get("timeline");
 
-    // force 10 pages always → calculate limit dynamically
-    const totalPages = 10; 
-    const limit = Math.ceil(total / totalPages); 
+    // build where clause
+    const where: any = {};
+    if (city) where.city = city;
+    if (propertyType) where.propertyType = propertyType;
+    if (status) where.status = status;
+    if (timeline) where.timeline = timeline;
+
+    // count with filters
+    let total = 0;
+    try {
+      total = await prisma.buyer.count({ where });
+    } catch (err) {
+      console.error("Prisma count error:", err);
+    }
+
+    // ✅ max 10 pages, dynamic rows per page
+    const totalPages = Math.min(10, Math.max(Math.ceil(total / 10), 1));
+    const limit = Math.ceil(total / totalPages) || 1; // rows per page
     const skip = (page - 1) * limit;
 
-    // fetch rows
+    // fetch rows with filters
     const buyers = await prisma.buyer.findMany({
+      where,
       skip,
       take: limit,
       orderBy: { updatedAt: "desc" },

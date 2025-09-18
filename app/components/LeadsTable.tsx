@@ -26,6 +26,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/app/components/ui/pagination"
+import { NoResults } from "./NoResults"
 
 export type Lead = {
   id: string
@@ -110,7 +111,7 @@ const TIMELINE_LABELS: Record<string, string> = {
 // Mobile card component
 function LeadCard({ lead }: { lead: Lead }) {
   return (
-    <div className="bg-white border border-slate-200 rounded-lg p-4 space-y-3 mt-2">
+    <div className="bg-white border border-slate-200 rounded-lg p-4 space-y-3 mt-2 w-full">
       <div className="flex justify-between items-start">
         <div>
           <h3 className="font-medium text-gray-900">{lead.name}</h3>
@@ -194,11 +195,12 @@ export default function LeadsTable({ leads, page, totalPages, onPageChange }: Le
 
   if (isMobile) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 ">
         <div className="grid gap-3">
           {leads.map((lead) => (
             <LeadCard key={lead.id} lead={lead} />
           ))}
+          {!leads.length && <NoResults/>}
         </div>
 
         {totalPages > 1 && (
@@ -246,10 +248,10 @@ export default function LeadsTable({ leads, page, totalPages, onPageChange }: Le
   }
 
   return (
-    <div className="space-y-4 mt-4">
-      <div className="border border-slate-200 rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table className="min-w-full">
+    <div className="space-y-4 mt-4 max-w-7xl w-full ">
+      <div className="border border-slate-200 rounded-lg overflow-hidden w-full">
+        <div className="overflow-x-auto  w-full">
+          <Table className="min-w-full table-auto w-full">
             <TableHeader className="bg-gray-50">
               <TableRow>
                 <TableHead className="text-left font-medium">Name</TableHead>
@@ -265,7 +267,7 @@ export default function LeadsTable({ leads, page, totalPages, onPageChange }: Le
             </TableHeader>
 
             <TableBody>
-              {leads.map((lead) => (
+               {leads.map((lead) => (
                 <TableRow key={lead.id} className="hover:bg-gray-50">
                   <TableCell className="font-medium">{lead.name}</TableCell>
                   <TableCell><div className="text-sm">{lead.phone}</div>
@@ -303,6 +305,7 @@ export default function LeadsTable({ leads, page, totalPages, onPageChange }: Le
             </TableBody>
           </Table>
         </div>
+         {!leads.length && <NoResults/>}
       </div>
 
       {totalPages > 1 && (
